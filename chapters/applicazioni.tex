@@ -1,0 +1,668 @@
+\chapter{Possibili applicazioni}
+\label{chap:applicazioni}
+Prima di prendere in esame alcune applicazioni possibili, si illustra brevemente l'utilizzo più semplice possibile.
+
+%--------------------------------------------
+\section{L'utilizzo semplice}
+
+%--------------------------------------------
+Nella sua prima versione, il codice della \cs{tikzmark} macro si presentava così:
+\begin{lstlisting}[frame=lines]
+\newcommand{\tikzmark}[1]{
+  \tikz[remember picture,overlay]\node (#1) {};
+}
+\end{lstlisting}
+Si ipotizzi di voler creare un collegamento fra due righe di testo con una freccia curva. Attraverso la \cs{tikzmark} macro definita in precedenza si può procedere in questo modo:
+\begin{lstlisting}[frame=lines]
+\documentclass{article}
+\usepackage{tikz}
+\newcommand{\tikzmark}[1]{
+  \tikz[remember picture,overlay]\node (#1) {};
+}
+
+\begin{document}
+\tikzmark{testo} Testo \\[2ex]
+\tikzmark{altro testo} Altro testo 
+\begin{tikzpicture}[remember picture,overlay]
+\path[->] (testo)edge[bend right](altro testo);
+\end{tikzpicture}
+\end{document}
+\end{lstlisting}
+In primo luogo si posizionano i marcatori vicino alle righe di testo con opportune label; successivamente, in un ambiente \amb{tikzpicture} si realizza il collegamento in modo opportuno partendo proprio dai marcatori. Ci si ricordi di compilare due volte! I risultati della prima e della seconda compilazione sono riportati nelle figure \ref{fig:primacompilazionesemplice} e \ref{fig:secondacompilazionesemplice}.
+
+\begin{figure}
+\tikzset{document color/.style={draw,top color=orange!5, bottom color=orange!20}}
+\tikzset{document size/.style={minimum width=4cm, minimum height=3cm,
+ corner size=20pt,
+  inner corner size=10pt,
+  corner start=30pt,
+  corner end=10pt,
+  corner up height=10pt,
+  corner down height=30pt,
+  fine sep start=3pt,
+  fine sep end=3pt,
+  }
+}
+\centering
+\subfloat[Prima compilazione\label{fig:primacompilazionesemplice}]{%
+  \includedocument[document color,document size]{sorgcrop/img/semplice1-crop}}\quad\quad
+\subfloat[Seconda compilazione\label{fig:secondacompilazionesemplice}]{%
+ \includedocument[document color,document size]{sorgcrop/semplice-crop}}
+\caption{Collegamento fra righe di testo}
+\end{figure}
+
+%--------------------------------------------
+\section{Riquadri esplicativi}
+
+%--------------------------------------------
+In questo esempio si vuole far comparire in una presentazione dei riquadri esplicativi in corrispondenza di determinate parole. 
+
+Siccome \Tikz{} mette a disposizione la libreria \library{shapes.callouts} per questo tipo di forme ed interagisce molto facilmente con Beamer per le animazioni ecco come si può sfruttare in modo intelligente il metodo della \cs{tikzmark} macro. L'identificazione dei termini da spiegare è chiaramente il compito da far svolgere alla nostra \cs{tikzmark} macro che quindi \emph{contrassegnerà} con una label identificativa le coordinate del punto immediatamente successivo alla fine del termine. Successivamente, le label verranno date in pasto ad un comando apposito, definito con \Tikz{}, che creerà effettivamente il riquadro.
+
+Si analizzano ora nel dettaglio i comandi necessari. Per prima cosa la \cs{tikzmark} macro:
+\begin{lstlisting}[frame=lines]
+\newcommand{\tikzmark}[1]{
+  \tikz[overlay,remember picture,xshift=-2pt,baseline=1.5pt] 
+  \node (#1) {};
+}
+\end{lstlisting}
+Rispetto al caso precedente ci sono due opzioni aggiuntive: \chiavestyle{xshift=-2pt} e \chiavestyle{baseline=1.5pt}. La loro funzione è semplicemente quella di \emph{spostare} automaticamente il marcatore in modo tale da renderlo più vicino e con un allineamento verticale centrale rispetto al termine da spiegare.
+
+Il seguente codice, invece, crea semplicemente uno ``stile'' \Tikz{}, \chiavestyle{visible on}, utile per rendere visibili gli oggetti in determinati momenti (\emph{overlay specifications} nel manuale di Beamer). 
+\begin{lstlisting}[frame=lines]
+\tikzset{
+    invisible/.style={opacity=0,text opacity=0},
+    visible on/.style={alt=#1{}{invisible}},
+    alt/.code args={<#1>#2#3}{%
+      \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}
+    },
+}
+\end{lstlisting}
+Infine, ecco il comando che materialmente realizza il riquadro esplicativo: si noti che richiede il pacchetto \packstyle{xparse}.
+\begin{lstlisting}[frame=lines]
+\NewDocumentCommand{\riquadro}{r<> O{opacity=0.8,text opacity=1} m m}
+{%
+  \tikz[remember picture, overlay]\node[align=justify, fill=cyan!20, 
+  text width=4.5cm, #2,visible on=<#1>, rounded corners,
+  draw,rectangle callout,anchor=pointer,
+  callout relative pointer={(230:1cm)}]
+  at (#3) {#4};
+}
+\end{lstlisting}
+In sostanza, \cs{riquadro} richiede 4 argomenti:
+\begin{itemize}
+\item il primo è obbligatorio: serve per definire in quali momenti della presentazione il riquadro è visibile e utilizza come delimitatori \texttt{< >} in conformità con lo stile adottato da Beamer;
+\item il secondo è opzionale: serve per definire la trasparenza del riquadro (si noti che il default prevede una leggera trasparenza in modo tale che il testo in background sia comunque visibile);
+\item il terzo è obbligatorio e rappresenta il punto di origine del riquadro, ovvero il punto che è stato contrassegnato con la \cs{tikzmark} macro;
+\item il quarto è obbligatorio: è il testo che comparirà nel riquadro.
+\end{itemize}
+\pagebreak
+Ecco il codice con un esempio completo:
+\begin{lstlisting}[frame=lines]
+\documentclass[10pt]{beamer}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{tikz}
+\usetikzlibrary{shapes.callouts}
+
+\usepackage{xparse}
+
+\tikzset{
+    invisible/.style={opacity=0,text opacity=0},
+    visible on/.style={alt=#1{}{invisible}},
+    alt/.code args={<#1>#2#3}{%
+      \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}
+    },
+}
+
+\NewDocumentCommand{\riquadro}{r<> O{opacity=0.8,text opacity=1} m m}
+{%
+  \tikz[remember picture, overlay]\node[align=justify, fill=cyan!20, 
+  text width=4.5cm, #2,visible on=<#1>, rounded corners,
+  draw,rectangle callout,anchor=pointer,
+  callout relative pointer={(230:1cm)}]
+  at (#3) {#4};
+}
+
+\newcommand{\tikzmark}[1]{
+  \tikz[overlay,remember picture,xshift=-2pt,baseline=1.5pt] 
+  \node (#1) {};
+}
+
+\begin{document}
+\begin{frame}{Esempio}
+In una terra lontana, dietro le montagne\tikzmark{montagne} Parole, 
+lontani dalle terre di Vocalia e Consonantia, vivono i testi casuali. 
+Vivono isolati nella cittadina di Lettere, sulle coste del Semantico, 
+un immenso oceano linguistico. Un piccolo ruscello\tikzmark{ruscello} 
+chiamato Devoto Oli attraversa quei luoghi, rifornendoli 
+di tutte le regolalie di cui hanno bisogno. È una terra paradismatica, 
+un paese della cuccagna\tikzmark{cuccagna} in cui golose porzioni 
+di proposizioni arrostite volano in bocca a chi le desideri. 
+Non una volta i testi casuali sono stati dominati dall'onnipotente 
+Interpunzione, una vita davvero non ortografica.
+\riquadro<2>{montagne}{Una montagna è un rilievo della superficie 
+terrestre che si estende sopra il terreno circostante 
+in un'area limitata.}
+\riquadro<3>{ruscello}{In idrografia viene chiamato ruscello o rio 
+un piccolo corso d'acqua e che confluisce in un corso d'acqua 
+maggiore come dimensione e quantità d'acqua trasportata.}
+\riquadro<4>[opacity=1]{cuccagna}{Il paese di Cuccagna è un luogo 
+ideale, ricordato in molti testi di ogni epoca, nel quale il 
+benessere, l'abbondanza e il piacere  è a portata di tutti.}
+\end{frame}
+\end{document}
+\end{lstlisting}
+
+Il risultato viene mostrato nelle figure \ref{fig:primadiapocallout}, \ref{fig:secondadiapocallout}, \ref{fig:terzadiapocallout} e \ref{fig:quartadiapocallout}. Si noti come, in figura \ref{fig:quartadiapocallout}, il riquadro sia completamente opaco e copra il testo: infatti l'ultimo riquadro viene creato con l'opzione \chiavestyle{opacity=1} che sovrascrive l'impostazione di default \chiavestyle{opacity=0.8,text opacity=1}.
+
+\begin{figure}[h]
+\tikzset{document color/.style={draw,top color=orange!5, bottom color=orange!20}}
+\tikzset{document size/.style={minimum width=5.75cm, minimum height=5.25cm,
+ corner size=20pt,
+  inner corner size=10pt,
+  corner start=30pt,
+  corner end=10pt,
+  corner up height=10pt,
+  corner down height=30pt,
+  fine sep start=3pt,
+  fine sep end=3pt,
+  }
+}
+\centering
+\subfloat[Prima diapositiva\label{fig:primadiapocallout}]{%
+  \includedocument[document color,document size][width=0.4\textwidth,keepaspectratio,page=1]{sorgtikz/callout}}\quad\quad
+\subfloat[Seconda diapositiva\label{fig:secondadiapocallout}]{%
+ \includedocument[document color,document size][width=0.4\textwidth,keepaspectratio,page=2]{sorgtikz/callout}}\\
+\subfloat[Terza diapositiva\label{fig:terzadiapocallout}]{%
+  \includedocument[document color,document size][width=0.4\textwidth,keepaspectratio,page=3]{sorgtikz/callout}}\quad\quad
+\subfloat[Quarta diapositiva\label{fig:quartadiapocallout}]{%
+ \includedocument[document color,document size][width=0.4\textwidth,keepaspectratio,page=4]{sorgtikz/callout}}\\ 
+\caption{Quadro con riquadri esplicativi}
+\end{figure}
+
+%--------------------------------------------
+\section{Collegamenti in figure}
+
+%--------------------------------------------
+A volte, addirittura all'interno di una figura realizzata con \Tikz{} può essere comodo posizionare dei marcatori per collegare le varie parti. Ecco un esempio in cui, partendo dalla seguente figura di riferimento
+\begin{center}
+\begin{tikzpicture}[remember picture]
+\node[fnode] (r1) at (0,0) {Puntatore \npd Chiave  \npt Testo \npq Puntatori \npc Testo};  
+\end{tikzpicture}
+\end{center}
+si posizioneranno dei marcatori (cerchi di colore nero) vicino ai campi ``Puntatore'' e ``Puntatori''.
+
+La figura di rifermento richiede nel preambolo:
+\begin{lstlisting}[frame=lines]
+\usetikzlibrary{shapes.multipart,calc}
+\newcommand{\npd}{\nodepart{two}}
+\newcommand{\npt}{\nodepart{three}}
+\newcommand{\npq}{\nodepart{four}}
+\newcommand{\npc}{\nodepart{five}}
+
+\tikzset{fnode/.style={rectangle split, 
+  rectangle split part align={left,left,left,center,left}, 
+  rectangle split parts=5, draw, minimum width =2.75cm,
+  rounded corners}
+}
+\end{lstlisting}
+I marcatori vengono definiti, questa volta, come cerchi di colore nero di cui l'utente può personalizzare la dimensione e la distanza rispetto al testo:
+\begin{lstlisting}[frame=lines]
+\NewDocumentCommand{\anchormark}{O{0.15 cm} m O{0.05}}{%
+  \tikz[overlay,remember picture,baseline=-0.5ex,xshift=#1] 
+    \node[draw,fill=black,circle,scale=#3] (#2) {};
+}
+\end{lstlisting}
+Anche in questo caso è necessario il pacchetto \packstyle{xparse} e sono 3 gli argomenti richiesti da \cs{anchormark}:
+\begin{itemize}
+\item il primo è opzionale e rappresenta la distanza fra marcatore e testo: il valore di default è \chiavestyle{0.15cm}, ma si può personalizzare la posizione, spostando ad esempio il marcatore a sinistra del testo inserendo un valore negativo;
+\item il secondo, obbligatorio, è la label identificativa con cui è contraddistinto il marcatore;
+\item il terzo, nuovamente opzionale, rappresenta il fattore di scala del raggio del cerchio; il valore di default è \chiavestyle{0.05}.
+\end{itemize}
+
+Il seguente codice riporta un esempio completo:
+\begin{lstlisting}[frame=lines]
+\documentclass{article}
+\usepackage{xparse}
+\usepackage{tikz}
+
+\usetikzlibrary{shapes.multipart,calc}
+\newcommand{\npd}{\nodepart{two}}
+\newcommand{\npt}{\nodepart{three}}
+\newcommand{\npq}{\nodepart{four}}
+\newcommand{\npc}{\nodepart{five}}
+
+\tikzset{fnode/.style={rectangle split, 
+  rectangle split part align={left,left,left,center,left}, 
+  rectangle split parts=5, draw, minimum width =2.75cm,
+  rounded corners}
+}
+
+\NewDocumentCommand{\anchormark}{O{0.15 cm} m O{0.05}}{%
+  \tikz[overlay,remember picture,baseline=-0.5ex,xshift=#1] 
+    \node[draw,fill=black,circle,scale=#3] (#2) {};
+}
+
+\tikzset{label style/.style={draw, rounded corners}}
+
+\begin{document}
+\begin{tikzpicture}[remember picture]
+\node[fnode] (r1) at (0,0) {Puntatore:\anchormark{puntatore 1}[0.075]  
+\npd Chiave  \npt Testo \npq 
+\anchormark[-0.15cm]{puntatore 2 sinistro}Puntatori 
+\anchormark{puntatore 2 destro}\npc Testo};  
+\node[fnode] (r2) at (5,0) {Puntatore:\anchormark{puntatore 3}[0.075]  
+\npd Chiave  \npt Testo \npq 
+\anchormark[-0.05cm]{puntatore 3 sinistro}Puntatori\npc Testo};  
+\end{tikzpicture}
+\begin{tikzpicture}[remember picture,overlay,-stealth] 
+\draw (puntatore 1.center) to ($(puntatore 1.center)+(2,1)$) 
+ node[right,label style] (mylabel){label};
+\draw (puntatore 2 destro.center) to (puntatore 3 sinistro);
+\draw (puntatore 2 sinistro.center) to 
+ ($(puntatore 2 sinistro.center)+(-1,1)$)
+ node[left,label style]{label};
+\draw (puntatore 3.center) |-(mylabel);
+
+% solo per connession esterna dei moduli
+\draw(r1.south)|- ($(r1.south)!0.5!(r2.south)-(0,1)$)-|(r2.south);
+\end{tikzpicture}
+\end{document}
+\end{lstlisting}
+
+Il risultato viene mostrato in figura \ref{fig:collegamentifigure}.
+
+\begin{figure}[ht]
+\tikzset{document color/.style={draw,top color=orange!5, bottom color=orange!20}}
+\tikzset{document size/.style={minimum width=8cm, minimum height=7cm,
+ corner size=30pt,
+  inner corner size=15pt,
+  corner start=45pt,
+  corner end=15pt,
+  corner up height=15pt,
+  corner down height=45pt,
+  fine sep start=4.2pt,
+  fine sep end=4.2pt,
+  }
+}
+\centering
+\includedocument[document color,document size]{sorgcrop/collegamenti-crop}
+\caption{Collegamenti fra figure}
+\label{fig:collegamentifigure}
+\end{figure}
+
+%--------------------------------------------
+\section{Annotazioni su formule}
+
+%--------------------------------------------
+In questo esempio, tratto da \guidaurl{http://tex.stackexchange.com/questions/75376/overbracket-with-tikz-square-arrow-style}{Overbracket with tikz square arrow style}, l'obbiettivo è selezionare parti di una formula da mettere in relazione ed inserire un'annotazione.
+
+Per la realizzazione è sufficiente la versione semplice della \cs{tikzmark} macro. Ecco il codice completo:
+\begin{lstlisting}[frame=lines]
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+\usepackage{amsmath}   
+
+\newcommand{\tikzmark}[1]{%
+  \tikz[overlay,remember picture] \node (#1) {};
+}
+% stile per la creazione della freccia 
+\tikzset{square arrow/.style={
+  to path={-- ++(0,.25) -| (\tikztotarget)}
+  }
+}
+
+\begin{document}
+\[
+= -\nu_{gx}  
+ \dfrac{\partial \, \left<\tikzmark{a}n\right>}{\partial\,x}  =
+ -\nu_{gx} \, 
+ \dfrac{\partial \left<\tikzmark{b}\eta_{0}\right>}{\partial \,x} 
+ \, \dfrac{\partial \,T}{\partial \,x}
+\]
+\tikz[overlay,remember picture]{%
+ \draw[<->,square arrow, red, thick] 
+   ($(a.north)+(0.25em,0.30ex)$) to ($(b.north)+(0.50em,0.30ex)$) ;
+ \node [above, yshift=1.50ex, blue] 
+   at  ($(a.north)!0.5!(b.north)$) {label};
+}
+\end{document}
+\end{lstlisting}
+
+Dopo avere compilato due volte, il risultato che si otterà è quello mostrato in figura \ref{fig:annotaformula}.
+
+\begin{figure}[ht]
+\tikzset{document color/.style={draw,top color=orange!5, bottom color=orange!20}}
+\tikzset{document size/.style={minimum width=6.5cm, minimum height=3cm,
+ corner size=20pt,
+  inner corner size=10pt,
+  corner start=30pt,
+  corner end=10pt,
+  corner up height=10pt,
+  corner down height=30pt,
+  fine sep start=3pt,
+  fine sep end=3pt,
+  }
+}
+\centering
+\includedocument[document color,document size]{sorgcrop/selezione_formula-crop}
+\caption{Annotazione su formula}
+\label{fig:annotaformula}
+\end{figure}
+
+%--------------------------------------------
+\section{Evidenziare parti del documento}
+
+%--------------------------------------------
+L'utilizzo \emph{principe} e \emph{principale} della \cs{tikzmark} macro è la creazione di riquardi atti ad evidenziare parti del documento; con \emph{parti del documento} si intendono parole o parti di frasi, formule, listati di codice ed algoritmi. 
+
+\subsection{Un primo esempio}
+In questo primo esempio verranno evidenziati termini di testo con l'ausilio della libreria \library{tikzmark} e di un comando apposito \cs{riquadro}. Tale comando crea semplicemente un rettangolo a partire da una coordinata nota, contrassegnata dalla \cs{tikzmark} macro in precedenza. Si noti che, grazie alla libreria, è possibile utilizzare le coordinate del marcatore con la sintassi \chiavestyle{pic cs:label}, dove \chiavestyle{label} è la label identificativa del marcatore.
+
+Il seguente esempio minimo, con due compilazioni, produce il risultato in figura \ref{fig:evidenziatermini}.
+\begin{lstlisting}[frame=lines]
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{tikzmark}
+
+\newcommand{\riquadro}[1]{%
+\tikz[remember picture,overlay]
+\draw[line width=1pt,rectangle,rounded corners,
+  fill=blue!10,draw=blue]
+  (pic cs:#1) ++(0.05,-0.15) rectangle (0.05,0.35);
+}
+
+\begin{document}
+\riquadro{a}Testo da evidenziare\tikzmark{a} e testo normale.\\[2ex]
+Testo normale e \riquadro{a1}testo evidenziato.\tikzmark{a1}\\[2ex]
+\end{document}
+\end{lstlisting}
+
+\begin{figure}[ht]
+\tikzset{document color/.style={draw,top color=orange!5, bottom color=orange!20}}
+\tikzset{document size/.style={minimum width=6.5cm, minimum height=3cm,
+ corner size=20pt,
+  inner corner size=10pt,
+  corner start=30pt,
+  corner end=10pt,
+  corner up height=10pt,
+  corner down height=30pt,
+  fine sep start=3pt,
+  fine sep end=3pt,
+  }
+}
+\centering
+\includedocument[document color,document size]{sorgcrop/ev-semplice-crop}
+\caption{Evidenziare termini nel testo}
+\label{fig:evidenziatermini}
+\end{figure}
+
+Ma come funziona esattamente il comando \cs{riquadro}? Analizzando la definizione
+\begin{lstlisting}[frame=lines]
+\newcommand{\riquadro}[1]{%
+\tikz[remember picture,overlay]
+\draw[line width=1pt,rectangle,rounded corners,
+  fill=blue!10,draw=blue]
+  (pic cs:#1) ++(0.05,-0.15) rectangle (0.05,0.35);
+}
+\end{lstlisting}
+si può notare che, a partire dalla coordinata del marcatore \chiavestyle{pic cs:label} se ne aggiorna il valore con \chiavestyle{++(0.05,-0.15)} raggiungendo un punto più in basso e spostato a destra: è uno dei bordi del riquadro. A questo punto si crea un rettangolo verso la coorindata \chiavestyle{(0.05,0.35)} che diventerà chiaramente il bordo opposto al primo del nostro riquadro. Il concetto è spiegato molto bene in figura \ref{fig:estremiriquadro}.
+
+\begin{figure}[ht]
+\tikzset{document color/.style={draw,top color=orange!5, bottom color=orange!20}}
+\tikzset{document size/.style={minimum width=6.5cm, minimum height=3cm,
+ corner size=20pt,
+  inner corner size=10pt,
+  corner start=30pt,
+  corner end=10pt,
+  corner up height=10pt,
+  corner down height=30pt,
+  fine sep start=3pt,
+  fine sep end=3pt,
+  }
+}
+\centering
+\includedocument[document color,document size]{sorgcrop/semplice-markers-crop}
+\caption{Estremi del riquadro}
+\label{fig:estremiriquadro}
+\end{figure}
+L'approccio tuttavia soffre di un problema non da poco: l'altezza del riquadro è infatti fissa. Si ipotizzi di voler evidenziare una frazione:
+\begin{lstlisting}[frame=lines]
+\documentclass{article}
+\usepackage{amsmath,tikz}
+\usetikzlibrary{tikzmark}
+
+\newcommand{\riquadro}[1]{%
+\tikz[remember picture,overlay]
+\draw[line width=1pt,rectangle,rounded corners,
+  fill=blue!10,draw=blue]
+  (pic cs:#1) ++(0.05,-0.15) rectangle (0.05,0.35);
+}
+
+\begin{document}
+\[x=\riquadro{a}\dfrac{10}{67}\tikzmark{a}\]
+\end{document}
+\end{lstlisting}
+Il risultato che si otterrebbe è mostrato in figura \ref{fig:problema} e, ovviamente, non è accettabile.
+\begin{figure}[ht]
+\tikzset{document color/.style={draw,top color=orange!5, bottom color=orange!20}}
+\tikzset{document size/.style={minimum width=2.5cm, minimum height=1.5cm,
+ corner size=10pt,
+  inner corner size=5pt,
+  corner start=15pt,
+  corner end=5pt,
+  corner up height=5pt,
+  corner down height=15pt,
+  fine sep start=1.3pt,
+  fine sep end=1.3pt,
+  }
+}
+\centering
+\includedocument[document color,document size]{sorgcrop/problema-crop}
+\caption{Riquadro con dimensioni errate}
+\label{fig:problema}
+\end{figure}
+
+\subsection{Soluzioni più avanzate}
+
+Per ovviare all'inconveniente descritto esistono almeno due possibili strade: la prima suggerita da \href{http://tex.stackexchange.com/users/4301/peter-grill}{Peter Grill} consiste nel determinare le esatte dimensioni del riquadro in modo automatico (riferimenti: \guidaurl{http://tex.stackexchange.com/questions/35319/a-boxed-alternative-with-minimal-spacing/\#35357}{A \textbackslash boxed alternative with minimal spacing?} e \guidaurl{http://tex.stackexchange.com/questions/35217/a-boxed-alternative-with-nicer-spacing/\#35227}{A \textbackslash boxed alternative with nicer spacing?}).
+
+Ad esempio, il seguente codice basato su questo tipo di approccio permette di ottenere il risultato in figura \ref{fig:peter}.
+\begin{lstlisting}[frame=lines]
+\documentclass{article}
+\usepackage{amsmath,tikz}
+\usetikzlibrary{tikzmark}
+
+\usetikzlibrary{calc}
+
+\makeatletter
+\newcommand*{\@DrawBoxHeightSep}{0.1em}%
+\newcommand*{\@DrawBoxDepthSep}{0.08em}%
+\newcommand{\@DrawBox}[6][blue]{
+%#1= stile, #2=altezza, #3=profondità, #4 marcatore sinistro,
+% #5 marcatore destro,
+\tikz[overlay,remember picture,baseline]
+ \draw[fill=#1!10,draw=#1,rounded corners]
+  ($(pic cs:#4)+(-0.2em,#2+\@DrawBoxHeightSep)$) rectangle
+  ($(pic cs:#5)+(0.2em,-#3-+\@DrawBoxDepthSep)$);
+\tikz[overlay,remember picture,baseline]
+ \node[anchor=base] at ($(pic cs:#4)!0.5!(pic cs:#5)$) {#6};
+}
+
+
+\newcounter{image}
+\setcounter{image}{1}
+\newdimen\@myBoxHeight%
+\newdimen\@myBoxDepth%
+\newcommand{\MyBox}[2][blue]{%
+ \settoheight{\@myBoxHeight}{#2}% Altezza riquadro
+ \settodepth{\@myBoxDepth}{#2}% Profondità riquadro
+ \tikzmark{l\theimage}#2\tikzmark{r\theimage}
+\@DrawBox[#1]{\@myBoxHeight}{\@myBoxDepth}
+  {l\theimage}{r\theimage}{#2}
+ \stepcounter{image}
+}
+\makeatother
+
+\begin{document}
+\[x=\MyBox{\ensuremath{\dfrac{10}{67}+c}}\]
+\end{document}
+\end{lstlisting}
+
+\begin{figure}[ht]
+\tikzset{document color/.style={draw,top color=orange!5, bottom color=orange!20}}
+\tikzset{document size/.style={minimum width=2.5cm, minimum height=1.5cm,
+ corner size=10pt,
+  inner corner size=5pt,
+  corner start=15pt,
+  corner end=5pt,
+  corner up height=5pt,
+  corner down height=15pt,
+  fine sep start=1.3pt,
+  fine sep end=1.3pt,
+  }
+}
+\centering
+\includedocument[document color,document size]{sorgcrop/peter-crop}
+\caption{Riquadro con dimensioni create automaticamente}
+\label{fig:peter}
+\end{figure}
+Il metodo ha indubbiamente un grande vantaggio: l'utente finale deve soltanto usare il comando \cs{MyBox} senza preoccuparsi di altro. Tuttavia al fine del calcolo delle dimensioni del riquadro è indispensabile che la zona da evidenziare sia passata come argomento al comando. Questo requisito non è di poco conto in quanto se la zona da evidenziare è su più righe l'approccio non funziona.
+
+La seconda soluzione proposta prevede che l'utente abbia la possibilità di modificare le coordinate che definiscono il bordo del riquadro in modo autonomo. Il riquadro, quindi, può essere \emph{esteso} a piacere: per questo motivo in questo approccio i marcatori sono definiti \emph{estensibili}. È il principio usato dal pacchetto \guidaurl{http://www.ctan.org/pkg/hf-tikz}{\packstyle{hf-tizk}}, disponibile su \TeX Live e MiK\TeX{}.
+
+Come funziona? Ecco un esempio minimo.
+\begin{lstlisting}[frame=lines]
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[customcolors]{hf-tikz}
+\hfsetfillcolor{blue!10}
+\hfsetbordercolor{blue}
+
+\begin{document}
+\[x= \tikzmarkin{a}(0.1,-0.4)(-0.05,0.6) 
+\dfrac{10}{67}+c \tikzmarkend{a} 
+\hspace*{1cm}
+\begin{pmatrix}
+1 & \tikzmarkin{a1}0 & 1\\
+0 & 1 & 1\\
+1 & 0 \tikzmarkend{a1} & 1
+\end{pmatrix}
+\]
+\end{document}
+\end{lstlisting}
+
+Dal risultato mostrato in figura \ref{fig:hf-tikz} si può osservare a sinistra la stessa parte di formula già evidenziata nell'esempio precedente; questa volta, però, si noti che occorre passare al comando \cs{tikzmarkin} sia la label che identifica il marcatore che due coordinate: rappresentano proprio il bordo inferiore destro e superiore sinistro del riquadro che sono stati estesi rispetto ai valori di default.
+
+\begin{figure}[ht]
+\tikzset{document color/.style={draw,top color=orange!5, bottom color=orange!20}}
+\tikzset{document size/.style={minimum width=5.75cm, minimum height=2.75cm,
+ corner size=20pt,
+  inner corner size=10pt,
+  corner start=30pt,
+  corner end=10pt,
+  corner up height=10pt,
+  corner down height=30pt,
+  fine sep start=3pt,
+  fine sep end=3pt,
+  }
+}
+\centering
+\includedocument[document color,document size]{sorgcrop/hf-tikz-crop}
+\caption{Riquadro con dimensioni definite dall'utente}
+\label{fig:hf-tikz}
+\end{figure}
+
+L'approccio inoltre permette facilmente anche di evidenziare parti di matrici che, essendo su più righe, il metodo precedente non riusciva a fare.
+
+Cosa conviene usare dunque? Il primo metodo funziona certamente meglio quando gli elementi da evidenziare sono su singole righe del documento; in caso di formule è necessario racchiudere in \cs{ensuremath\{\}} la parte di formula da evidenziare altrimenti si incorre in un errore. Con il metodo dei marcatori estensibili non esistono queste limitazioni, ma l'utente deve avere pazienza e fare qualche tentativo per \emph{trovare} le coordinate giuste.
+
+\section{Evidenziare ed inserire un'annotazione}
+Si prende ora in esame un esempio decisamente più complesso: come si è visto, per evidenziare parti del documento esistono diversi metodi rodati; ora si richiede in più la possibilità di inserire un'annotazione da affiancare alla parte di testo evidenziata. Nell'esempio, tratto da \guidaurl{http://tex.stackexchange.com/questions/57060/mark-a-pseudocode-block-and-insert-comments-near-it}{Mark a pseudocode block and insert comments near it}, si vuole evidenziare parte di un algoritmo.
+
+Il comando principale, \cs{riquadro}, questa volta è capace di supportare i marcatori estensibili e, poiché si tratta di una presentazione, come primo argomento richiede in quali istanti di tempo sarà visibile il riquadro.
+
+Per inserire l'annotazione si sfrutta la proprietà per cui grazie alla sintassi \chiavestyle{pic cs:label} si accede alle coordinate del marcatore \chiavestyle{label}: si definità una \emph{coordinata base} a partire da quella del marcatore e si inserirà l'annotazione come un semplice nodo di \Tikz{}.
+
+L'esempio completo:
+\begin{lstlisting}[frame=lines]
+\documentclass{beamer}
+\usepackage{algorithm,algpseudocode}
+\usepackage{xparse}
+\usepackage{tikz}
+\usetikzlibrary{calc,tikzmark}
+
+\NewDocumentCommand{\riquadro}{r<> m D(){5.2,-.1} D(){-0.4,0}}{%
+\only<#1>{\tikz[remember picture with id=#2]
+\draw[line width=1pt,fill=blue!10, draw=blue,rectangle,rounded corners]
+node [anchor=base] (#2){} (pic cs:#2) ++(#3) rectangle (#4);
+	}
+}
+
+\begin{document}
+\begin{frame}
+\begin{algorithm}[H]
+\begin{algorithmic}
+ \Function{tarjan}{Node* node}        
+  \State $node.visited \gets $ \textbf{true}
+  \State $node.index \gets indexCounter$
+  \State $s.push(node)$
+  \ForAll{$successor$ in $node.successors$}
+    \If{$!node.visited$}
+         \Call{tarjan}{successor}
+   \EndIf
+   \State $node.lowlink \gets$ \Call{min}{$node.lowlink, successor.lowlink$}
+  \EndFor
+            
+  \riquadro<1->{a1}\If{$node.lowlink == node.index$}
+    \Repeat 
+       \State $successor \gets stack.pop()$
+       \Until{$successor == node$}
+     \EndIf\tikzmark{a1}
+ \EndFunction
+\end{algorithmic}
+\label{alg:seq2}
+\end{algorithm}
+
+% Inserire l'annotazione
+\tikzset{annotazione/.style={%
+		rectangle,draw, gray,text width=3cm,
+		align=justify,right
+	}
+}
+\begin{tikzpicture}[remember picture,overlay]
+% modificare questo parametro per cambiare 
+% la coordinata alla base dell'annotazione
+\coordinate (annota) at ($(pic cs:a1)+(5.5,1.25)$); 
+\node[annotazione] at (annota) 
+ {Annotazione da inserire accanto alla parte evidenziata};
+\end{tikzpicture}
+\end{frame}
+
+\end{document}
+\end{lstlisting}
+
+Il risultato ottenuto viene mostrato in figura \ref{fig:evidenziaannotazione}.
+
+\begin{figure}[ht]
+\tikzset{document color/.style={draw,top color=orange!5, bottom color=orange!20}}
+\tikzset{document size/.style={minimum width=10cm, minimum height=8.5cm,
+ corner size=30pt,
+  inner corner size=15pt,
+  corner start=45pt,
+  corner end=15pt,
+  corner up height=15pt,
+  corner down height=45pt,
+  fine sep start=4.4pt,
+  fine sep end=4.4pt,
+  }
+}
+\centering
+\includedocument[document color,document size][scale=0.65]{sorgtikz/annota_algoritmo}
+\caption{Evidenziare ad annotare alcuni passaggi di un algoritmo}
+\label{fig:evidenziaannotazione}
+\end{figure}
