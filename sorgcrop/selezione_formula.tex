@@ -1,0 +1,22 @@
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+\usepackage{amsmath}   
+
+\newcommand{\tikzmark}[1]{%
+\tikz[overlay,remember picture] \node (#1) {};
+}
+% stile per la creazione della freccia 
+\tikzset{square arrow/.style={to path={-- ++(0,.25) -| (\tikztotarget)}}}
+\thispagestyle{empty}
+\begin{document}
+\[
+=\, -\nu_{gx}\,  \dfrac{\partial \, \left<\tikzmark{a}n\right>}{\partial\,x} \, =\, -\nu_{gx} \, \dfrac{\partial \left<\tikzmark{b}\eta_{0}\right>}{\partial \,x} \, \dfrac{\partial \,T}{\partial \,x}
+\]
+\tikz[overlay,remember picture]{%
+    \draw[<->,square arrow, red, thick] 
+        ($(a.north)+(0.25em,0.30ex)$) to ($(b.north)+(0.50em,0.30ex)$) ;
+    \node [above, yshift=1.50ex, blue] at  ($(a.north)!0.5!(b.north)$) {label};
+}
+\end{document}
