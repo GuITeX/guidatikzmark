@@ -1,0 +1,15 @@
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{tikzmark}
+
+\newcommand{\riquadro}[1]{%
+\tikz[remember picture,overlay]
+ \draw[line width=1pt,rectangle,rounded corners,fill=blue!10,draw=blue]
+  (pic cs:#1) ++(0.05,0.35) rectangle (0.05,-0.15);
+}
+\thispagestyle{empty}
+\begin{document}
+
+\riquadro{a}Testo da evidenziare\tikzmark{a} e testo normale.\\[2ex]
+Testo normale e \riquadro{a1}testo evidenziato.\tikzmark{a1}\\[2ex]
+\end{document}
