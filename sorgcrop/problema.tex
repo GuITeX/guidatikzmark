@@ -1,0 +1,14 @@
+\documentclass{article}
+\usepackage{amsmath,tikz}
+\usetikzlibrary{tikzmark}
+
+\newcommand{\riquadro}[1]{%
+\tikz[remember picture,overlay]
+\draw[line width=1pt,rectangle,rounded corners,fill=blue!10,draw=blue]
+  (pic cs:#1) ++(0.05,0.35) rectangle (0.05,-0.15);
+}
+\thispagestyle{empty}
+\begin{document}
+
+\[x=\riquadro{a}\dfrac{10}{67}\tikzmark{a}\]
+\end{document}
