@@ -1,0 +1,12 @@
+\documentclass{article}
+\usepackage{tikz}
+\newcommand{\tikzmark}[1]{\tikz[remember picture,overlay]\node (#1) {};}
+\thispagestyle{empty}
+
+\begin{document}
+\tikzmark{testo} Testo \\[2ex]
+\tikzmark{altro testo} Altro testo 
+\begin{tikzpicture}[remember picture,overlay]
+\path[->] (testo)edge[bend right](altro testo);
+\end{tikzpicture}
+\end{document}
