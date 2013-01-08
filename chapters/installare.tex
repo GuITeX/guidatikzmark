@@ -1,0 +1,46 @@
+\chapter{Installare la libreria}
+\label{chap:install}
+
+Una volta scaricato il file \filestyle{tikzmark.dtx} da \guidaurl{http://bazaar.launchpad.net/~tex-sx/tex-sx/development/view/head:/tikzmark.dtx}{launchpad.net} occorre salvarlo in una directory temporanea (ad esempio in \filestyle{\textasciitilde/Scrivania/prova/}). Con l'ausilio del terminale ci si sposti nella cartella creata:
+\begin{verbatim}
+cd ~/Scrivania/prova/
+\end{verbatim}
+e si compili il file \filestyle{tikzmark.dtx} con \prog{pdflatex}:
+\begin{verbatim}
+pdflatex tikzmark.dtx
+\end{verbatim}
+L'operazione verrà interrotta in quanto manca una figura di esempio:
+\begin{verbatim}
+! LaTeX Error: File `tikzmark_example' not found.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.261 % \includegraphics{tikzmark_example}
+                                          
+?
+\end{verbatim}
+Si prema \verb!s! per completare comunque il processo. A questo punto nella cartella \filestyle{prova} ci saranno numerosi file; tuttavia, quelli veramente importanti sono:
+\begin{itemize}
+\item \filestyle{tikzlibrarytikzmark.code.tex}: la libreria vera e propria;
+\item \filestyle{tikzmarklibrarylistings.code.tex}: una libreria specifica per listati di codice;
+\item \filestyle{tikzmark.pdf}: la documentazione (non ancora completa).
+\end{itemize}
+La soluzione migliore per l'installazione è inserire le librerie e la documentazione nel proprio albero personale; supponendo di lavorare con \TeX Live su Ubuntu (per altri sistemi operativi si identifichi il path in cui è collocato l'albero personale):
+\begin{itemize}
+\item spostarsi con il terminale su:
+\begin{verbatim}
+cd ~/texmf/tex/latex/
+\end{verbatim}
+creare una nuova directory \filestyle{tikzmark} e copiare all'interno le due librerie;
+\item spostarsi con il terminale su:
+\begin{verbatim}
+cd ~/texmf/doc/
+\end{verbatim}
+creare una nuova directory \filestyle{tikzmark} e copiare all'interno la documentazione; questa operazione rende accessibile la documentazione digitando da terminale:
+\begin{verbatim}
+texdoc tikzmark
+\end{verbatim}
+\end{itemize}
+In alternativa, è sempre possibile copiare le librerie localmente in ogni directory in cui il \filestyle{documento.tex} ne faccia uso.
