@@ -14,7 +14,7 @@ Per compilare il documento si usi:
 ````
 $ make IntroTikZmark
 ````
-da terminale. Per rimuovere i files ausiliari:
+da terminale. Per rimuovere i file ausiliari:
 ````
 $ make clean
 ````
@@ -22,4 +22,4 @@ o in alternativa:
 ````
 $ make distclean
 ````
-che rimuove anche i files pdf ausiliari.
+che rimuove anche i file pdf ausiliari.
