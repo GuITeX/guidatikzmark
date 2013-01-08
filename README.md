@@ -20,6 +20,6 @@ $ make clean
 ````
 o in alternativa:
 ````
-$ make clean
+$ make distclean
 ````
 che rimuove anche i files pdf ausiliari.
