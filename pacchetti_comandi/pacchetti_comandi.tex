@@ -1,0 +1,61 @@
+\usepackage{guit}
+\usepackage{tikz}
+\input{pacchetti_comandi/documento}
+
+\usetikzlibrary{calc,backgrounds,fadings}
+\tikzfading[
+  name = fade horizontal,
+  left color = transparent!95,
+  right color = transparent!30
+]
+
+
+\usetikzlibrary{shapes.multipart,calc}
+\newcommand{\npd}{\nodepart{two}}
+\newcommand{\npt}{\nodepart{three}}
+\newcommand{\npq}{\nodepart{four}}
+\newcommand{\npc}{\nodepart{five}}
+
+\tikzset{fnode/.style={rectangle split, rectangle split part align={left,left,left,center,left}, rectangle split parts=5, draw, minimum width =2.75cm, rounded corners}}
+
+\usepackage{subfig}
+\usepackage{xparse}
+
+\newcommand{\Tikz}{Ti\textit{k}Z}
+\newcommand{\guidaurl}[2]{\href{#1}{#2}\footnote{URL: \tiny\texttt{#1}}}
+\newcommand{\library}[1]{\textcolor{OrangeRed2}{\texttt{#1}}}
+
+\NewDocumentCommand{\includedocument}{O{} O{} m}{\tikz[baseline]\node[document,#1]{\includegraphics[#2]{#3}};}
+
+\lstset{language=[LaTeX]TeX,%
+   basicstyle=\scriptsize\ttfamily,%
+   keywordstyle=\scriptsize\ttfamily\color{OrangeRed2},%
+   commentstyle=\scriptsize\ttfamily\color{DarkOrchid1},%
+   framerule=2pt,%
+   rulecolor=\color{DarkOrange1},%
+   rulesep=4pt,%
+   framesep=5pt,%
+   texcsstyle=*\color{OrangeRed2},                                       
+   }
+
+\lstset{language=[LaTeX]TeX,%
+showstringspaces=false,
+commentstyle=\scriptsize\ttfamily\color{DarkOrchid1},
+numbers=left,
+numberstyle=\tiny,
+morecomment=[s][\scriptsize\ttfamily\color{DarkOrchid1}]\[ \],
+morekeywords={circle,draw,node,rectangle,style,edge,path,
+filldraw,foreach,definecolor,usetikzlibrary,addplot,coordinates,plot,coordinate,
+usetheme,tikzmark,tikzset,pgfdeclarelayer,pgfsetlayers,NewDocumentCommand,
+arc,pgfdeclarehorizontalshading,DeclareMathOperator,PassOptionsToPackage,
+tikzmark,pgfkeysalso,only}                                          
+}
+\lstset{
+literate=
+{à}{{\ttfamily\`a}}1
+{è}{{\ttfamily\`e}}1
+{ì}{{\ttfamily\`i}}1
+{ò}{{\ttfamily\`o}}1
+{ù}{{\ttfamily\`u}}1
+{È}{{\ttfamily\`E}}1,
+}
