@@ -22,4 +22,4 @@ o in alternativa:
 ````
 $ make clean
 ````
-che rimuovere anche i files pdf ausiliari.
+che rimuove anche i files pdf ausiliari.
