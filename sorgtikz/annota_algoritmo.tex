@@ -1,0 +1,54 @@
+\documentclass{beamer}
+\usepackage{algorithm,algpseudocode}
+\usepackage{xparse}
+\usepackage{tikz}
+\usetikzlibrary{calc,tikzmark}
+
+\NewDocumentCommand{\riquadro}{r<> m D(){5.2,-.1} D(){-0.4,0}}{%
+\only<#1>{\tikz[remember picture with id=#2]
+\draw[line width=1pt,fill=blue!10, draw=blue,rectangle,rounded corners]
+node [anchor=base] (#2){} (pic cs:#2) ++(#3) rectangle (#4);
+	}
+}
+
+\begin{document}
+\begin{frame}
+\begin{algorithm}[H]
+\begin{algorithmic}
+ \Function{tarjan}{Node* node}        
+  \State $node.visited \gets $ \textbf{true}
+  \State $node.index \gets indexCounter$
+  \State $s.push(node)$
+  \ForAll{$successor$ in $node.successors$}
+    \If{$!node.visited$}
+         \Call{tarjan}{successor}
+   \EndIf
+   \State $node.lowlink \gets$ \Call{min}{$node.lowlink, successor.lowlink$}
+ \EndFor
+            
+   \riquadro<1->{a1}\If{$node.lowlink == node.index$}
+     \Repeat 
+        \State $successor \gets stack.pop()$
+         \Until{$successor == node$}
+      \EndIf\tikzmark{a1}
+   \EndFunction
+\end{algorithmic}
+\label{alg:seq2}
+\end{algorithm}
+
+% To insert the annotation
+\begin{tikzpicture}[remember picture,overlay]
+\tikzset{annotazione/.style={%
+		rectangle,draw, gray,text width=3cm,
+		align=justify,right
+	}
+}
+\coordinate (annota) at ($(pic cs:a1)+(5.5,1.25)$); 
+% modificare questo parametro per cambiare 
+% la coordinata ancora dell'annotazione
+\node[annotazione] at (annota) 
+ {Annotazione da inserire accanto alla parte evidenziata};
+\end{tikzpicture}
+\end{frame}
+
+\end{document}
