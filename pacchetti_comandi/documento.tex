@@ -1,0 +1,116 @@
+\makeatletter
+\pgfkeys{/tikz/.cd,
+  corner size/.initial=10pt,
+  inner corner size/.initial=5pt,
+  corner start/.initial=15pt,
+  corner end/.initial=5pt,
+  corner up height/.initial=5pt,
+  corner down height/.initial=15pt,
+  fine sep start/.initial=1.35pt,
+  fine sep end/.initial=1.35pt,
+}
+
+\newlength\pgf@xd
+\newlength\pgf@xe
+\newlength\pgf@yf
+\newlength\pgf@yg
+\newlength\pgf@xh
+\newlength\pgf@yh
+\newlength\pgf@xi
+\newlength\pgf@yi
+
+
+\pgfdeclareshape{document}{
+\inheritsavedanchors[from=rectangle]
+\inheritanchorborder[from=rectangle]
+\inheritanchor[from=rectangle]{center}
+\inheritanchor[from=rectangle]{north}
+\inheritanchor[from=rectangle]{north west}
+\inheritanchor[from=rectangle]{south}
+\inheritanchor[from=rectangle]{west}
+\inheritanchor[from=rectangle]{east}
+
+\savedmacro\cornersize{%
+    \edef\cornersize{\pgfkeysvalueof{/tikz/corner size}}%
+}
+
+\savedmacro\innercornersize{%
+    \edef\innercornersize{\pgfkeysvalueof{/tikz/inner corner size}}%
+}
+
+\savedmacro\startcornersize{%
+    \edef\startcornersize{\pgfkeysvalueof{/tikz/corner start}}%
+}
+
+\savedmacro\endcornersize{%
+    \edef\endcornersize{\pgfkeysvalueof{/tikz/corner end}}%
+}
+
+\savedmacro\cornerupheight{%
+    \edef\cornerupheight{\pgfkeysvalueof{/tikz/corner up height}}%
+}
+
+\savedmacro\cornerdownheight{%
+    \edef\cornerdownheight{\pgfkeysvalueof{/tikz/corner down height}}%
+}
+
+\savedmacro\finesep{%
+    \edef\finesep{\pgfkeysvalueof{/tikz/fine sep start}}%
+}
+
+\savedmacro\finesepend{%
+    \edef\finesepend{\pgfkeysvalueof{/tikz/fine sep end}}%
+}
+
+% ... and possibly more
+\backgroundpath{
+\southwest \pgf@xa=\pgf@x \pgf@ya=\pgf@y
+\northeast \pgf@xb=\pgf@x \pgf@yb=\pgf@y
+% compute corner of ‘‘flipped page’’
+\pgf@xc=\pgf@xb \advance\pgf@xc by-\cornersize
+\pgf@yc=\pgf@yb \advance\pgf@yc by-\cornersize
+
+
+\setlength{\pgf@xd}{\pgf@xb}
+\advance\pgf@xd by-\startcornersize
+
+\setlength{\pgf@xe}{\pgf@xb}
+\advance\pgf@xe by-\endcornersize
+
+\setlength{\pgf@yf}{\pgf@yb}
+\advance\pgf@yf by-\cornerupheight
+
+\setlength{\pgf@yg}{\pgf@yb}
+\advance\pgf@yg by-\cornerdownheight
+
+\setlength{\pgf@xh}{\pgf@xb}
+\advance\pgf@xh by-\cornersize
+\advance\pgf@xh by-\finesep
+
+\setlength{\pgf@yh}{\pgf@yb}
+\advance\pgf@yh by-\finesep
+
+\setlength{\pgf@xi}{\pgf@xb}
+\advance\pgf@xi by-\finesepend
+
+\setlength{\pgf@yi}{\pgf@yb}
+\advance\pgf@yi by-\cornersize
+\advance\pgf@yi by-\finesepend
+
+% construct main path
+\pgfpathmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}} %start
+\pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@yb}} % go up
+\pgfpathlineto{\pgfpoint{\pgf@xd}{\pgf@yb}} % go straight on untill start corner
+\pgfpatharc{90}{0}{\innercornersize}
+\pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+\pgfpathlineto{\pgfpoint{\pgf@xe}{\pgf@yc}}
+\pgfpatharc{90}{0}{\innercornersize}
+\pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+\pgfpathclose
+% add little corner
+\pgfpathmoveto{\pgfpoint{\pgf@xh}{\pgf@yh}}
+\pgfpathlineto{\pgfpoint{\pgf@xi}{\pgf@yi}}
+\pgfpathclose
+}
+}
+\makeatother
