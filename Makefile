@@ -11,7 +11,9 @@ FILE_CLEAN         = *.aux *.log *.out *.lof *.toc \
                      $(wildcard sorgtikz/*.out) \
                      $(wildcard sorgtikz/*.log) \
                      $(wildcard sorgtikz/*.aux) \
+                     $(wildcard sorgtikz/*.toc) \
                      $(wildcard sorgtikz/*.snm) \
+                     $(wildcard sorgtikz/*.nav) \
                      $(wildcard sorgcrop/*.out) \
                      $(wildcard sorgcrop/*.log) \
                      $(wildcard sorgcrop/*.aux)
