@@ -2,8 +2,8 @@ guidatikzmark
 =============
 
 Contiene i sorgenti LaTeX della Guida Tematica Introduzione all'uso della macro tikzmark.
-Per compilare il documento è necessaria la classe `guidatematica.cls', il relativo stile
-bibliografico `guidatematica.bst' ed i loghi `LogoGuITtondo.pdf` e `LogoGuITlineare.pdf`
+Per compilare il documento è necessaria la classe `guidatematica.cls`, il relativo stile
+bibliografico `guidatematica.bst` ed i loghi `LogoGuITtondo.pdf` e `LogoGuITlineare.pdf`
 disponibili all'indirizzo https://github.com/GuITeX/guidetematiche.
 
 Questa guida è rilasciata con licenza CC BY-NC-SA 3.0 (si veda come
