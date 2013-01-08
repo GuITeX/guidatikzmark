@@ -1,0 +1,21 @@
+\chapter{Introduzione}
+Il concetto introdotto dalla \cs{tikzmark} macro è veramente semplice: si fornisce uno strumento per \emph{identificare} un qualsiasi punto della pagina per un utilizzo successivo. L'identificazione avviene con il pacchetto \Tikz{}, definendo un nodo senza testo caratterizzato da una label. In realtà esistono anche altri pacchetti che permettono di identificare punti di una pagina, ma siccome molte volte \emph{l'utilizzo successivo} si realizza con \Tikz{}, ecco perché sono stati creati comandi partendo dagli strumenti offerti dal pacchetto con questa funzionalità.
+
+L'autore originale della \cs{tikzmark} macro è \href{http://tex.stackexchange.com/users/86/andrew-stacey}{Andrew Stacey}, ma occorre precisare che molti utenti su \guidaurl{http://tex.stackexchange.com}{\TeX{}.SX} hanno contribuito nel creare versioni differenti o nuovi comandi con la stessa filosofia di base.
+
+Attualmente, Andrew Stacey ha messo a disposizione il codice in una libreria per \Tikz{} su \guidaurl{http://bazaar.launchpad.net/~tex-sx/tex-sx/development/view/head:/tikzmark.dtx}{launchpad.net}; purtroppo, non essendo disponibile su \guidaurl{http://ctan.org}{CTAN}, è necessario scaricare il file \texttt{tikzmark.dtx} ed installare manualmente la libreria. Siccome nella guida la libreria sarà necessaria, si spiegherà più nel dettaglio come installarla nel capitolo \ref{chap:install} mentre il capitolo \ref{chap:applicazioni}, invece, prenderà in esame ed illustrerà possibili applicazioni.
+
+Questa introduzione prosegue analizzando caratteristiche e prerequisiti generali del metodo. 
+
+Si consideri che sono sempre necessarie due compilazioni: la prima permette di scrivere sul file ausiliario le posizioni, in termine di coordinate e label identificative, dei marcatori. Con la seconda, invece, ciò che si deve posizionare nei punti contrassegnati viene effettivamente realizzato. La doppia compilazione incontra spesso lo sfavore degli utenti: personalmente non ci vedo nulla di strano, infatti la medesima procedura è necessaria per creare l'indice e i riferimenti ipertestuali, per non parlare della creazione di una bibliografia in cui due compilazioni non bastano neppure. Il motivo per cui sono richieste è dato dalle opzioni \opz{remember picture, overlay} passate agli ambienti \amb{tikzpicture}.
+
+È importante notare che le label identificative con cui si caratterizzano i punti devono essere univoche nel testo: in caso contrario il risultato ottenuto è sempre a dir poco bizzarro. \Tikz{} è molto flessibile e permette un'ampia scelta; sono tutti identificativi validi:
+\begin{itemize}
+\item singole lettere: \texttt{a};
+\item singoli numeri: \texttt{1};
+\item lettere e numeri: \texttt{a1};
+\item singole parole: \texttt{label};
+\item più parole: \texttt{prima label};
+\item parole e numeri: \texttt{label 1}.
+\end{itemize}
+Nel corso della guida molte di queste possibilità verranno effettivamente utilizzate.
