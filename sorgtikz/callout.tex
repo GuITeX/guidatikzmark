@@ -1,0 +1,34 @@
+\documentclass[10pt]{beamer}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes.callouts}
+
+\usepackage{xparse}
+
+\tikzset{
+    invisible/.style={opacity=0,text opacity=0},
+    visible on/.style={alt=#1{}{invisible}},
+    alt/.code args={<#1>#2#3}{%
+      \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}
+    },
+}
+
+\NewDocumentCommand{\riquadro}{r<> O{opacity=0.8,text opacity=1} m m}{%
+\tikz[remember picture, overlay]\node[align=justify, fill=cyan!20, text width=4.5cm,
+#2,visible on=<#1>, rounded corners,
+draw,rectangle callout,anchor=pointer,callout relative pointer={(230:1cm)}]
+at (#3) {#4};
+}
+
+\newcommand{\tikzmark}[1]{\tikz[overlay,remember picture,xshift=-2pt,baseline=1.5pt] \node (#1) {};}
+
+\begin{document}
+\begin{frame}{Esempio}
+In una terra lontana, dietro le montagne\tikzmark{montagna} Parole, lontani dalle terre di Vocalia e Consonantia, vivono i testi casuali. Vivono isolati nella cittadina di Lettere, sulle coste del Semantico, un immenso oceano linguistico. Un piccolo ruscello\tikzmark{ruscello} chiamato Devoto Oli attraversa quei luoghi, rifornendoli di tutte le regolalie di cui hanno bisogno. È una terra paradismatica, un paese della cuccagna\tikzmark{cuccagna} in cui golose porzioni di proposizioni arrostite volano in bocca a chi le desideri. Non una volta i testi casuali sono stati dominati dall’onnipotente Interpunzione, una vita davvero non ortografica.
+\riquadro<2>{montagna}{Una montagna è un rilievo della superficie terrestre che si estende sopra il terreno circostante in un'area limitata.}
+\riquadro<3>{ruscello}{In idrografia viene chiamato ruscello o rio un piccolo corso d'acqua e che confluisce in un corso d'acqua maggiore come dimensione e quantità d'acqua trasportata.}
+\riquadro<4>[opacity=1]{cuccagna}{Il paese di Cuccagna è un luogo ideale, ricordato in molti testi di ogni epoca, nel quale il benessere, l'abbondanza e il piacere è a portata di tutti.}
+\end{frame}
+\end{document}
