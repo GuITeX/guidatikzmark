@@ -1,0 +1,39 @@
+\documentclass{article}
+\usepackage{amsmath,tikz}
+\usetikzlibrary{tikzmark}
+
+\usetikzlibrary{calc}
+
+\makeatletter
+\newcommand*{\@DrawBoxHeightSep}{0.1em}%
+\newcommand*{\@DrawBoxDepthSep}{0.08em}%
+\newcommand{\@DrawBox}[6][blue]{
+%#1= stile, #2=altezza, #3=profondità, #4 marcatore sinistro,
+% #5 marcatore destro,
+\tikz[overlay,remember picture,baseline]
+ \draw[fill=#1!10,draw=#1,rounded corners]
+  ($(pic cs:#4)+(-0.2em,#2+\@DrawBoxHeightSep)$) rectangle
+  ($(pic cs:#5)+(0.2em,-#3-+\@DrawBoxDepthSep)$);
+\tikz[overlay,remember picture,baseline]
+ \node[anchor=base] at ($(pic cs:#4)!0.5!(pic cs:#5)$) {#6};
+}
+
+
+\newcounter{image}
+\setcounter{image}{1}
+\newdimen\@myBoxHeight%
+\newdimen\@myBoxDepth%
+\newcommand{\MyBox}[2][blue]{%
+ \settoheight{\@myBoxHeight}{#2}% Altezza riquadro
+ \settodepth{\@myBoxDepth}{#2}% Profondità riquadro
+ \tikzmark{l\theimage}#2\tikzmark{r\theimage}
+\@DrawBox[#1]{\@myBoxHeight}{\@myBoxDepth}
+  {l\theimage}{r\theimage}{#2}
+ \stepcounter{image}
+}
+\makeatother
+
+\thispagestyle{empty}
+\begin{document}
+\[x=\MyBox{\ensuremath{\dfrac{10}{67}+c}}\]
+\end{document}
