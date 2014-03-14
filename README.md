@@ -22,4 +22,8 @@ o in alternativa:
 ````
 $ make distclean
 ````
-che rimuove anche i file pdf ausiliari.
+che rimuove anche i file PDF ausiliari fatta eccezione per il file PDF della guida. Invece:
+````
+$ make cleanall
+````
+rimuove anche il file della guida
