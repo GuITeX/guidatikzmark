@@ -42,4 +42,7 @@ distclean : clean
 
 clean:
 	rm -f $(FILE_CLEAN)
-
+	
+cleanall : distclean
+	rm -f $(PRINCIPALE_PDF)
+    
